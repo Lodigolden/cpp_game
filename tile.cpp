@@ -4,7 +4,7 @@
 Tile::Tile(void)
 {
     this->p_color = BLACK; 
-    this->p_piece = NO_PIECE; 
+    this->p_piece = Piece_Type::NO_PIECE; 
     this->p_is_selected = false; 
 }
 
@@ -15,7 +15,7 @@ void Tile::setColor(Color col)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-void Tile::setPiece(Piece tile_piece)
+void Tile::setPiece(Piece_Type tile_piece)
 {
     this->p_piece = tile_piece; 
 }
@@ -33,7 +33,7 @@ Color Tile::getColor(void)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-Piece Tile::getPiece(void)
+Piece_Type Tile::getPiece(void)
 {
     return this->p_piece; 
 } 

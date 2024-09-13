@@ -3,12 +3,11 @@
 /*
 An enum for if a tile has a piece
 */
-enum Piece
+enum Piece_Type
 {
     NO_PIECE,
     RED_PIECE,
-    BLACK_PIECE,
-    SELECTED_PIECE
+    BLACK_PIECE
 };
 
 /*
@@ -36,7 +35,7 @@ public:
     Args: 
         tile_piece: Piece on the tile (Piece)
     */
-    void setPiece(Piece tile_piece); 
+    void setPiece(Piece_Type tile_piece); 
 
     /*
     Toggles if the piece is selected.
@@ -57,7 +56,7 @@ public:
     Returns: 
         The tile piece (Piece)
     */
-    Piece getPiece(void); 
+    Piece_Type getPiece(void); 
 
     /*
     Gets if the piece is selected. 
@@ -65,10 +64,10 @@ public:
     Returns: 
         Whether the piece is selected (bool)
     */
-   bool getPieceSelected(void); 
+    bool getPieceSelected(void); 
 
 private: 
     Color p_color;      // Color of the tile
-    Piece p_piece;      // Piece on the tile
+    Piece_Type p_piece; // Piece on the tile
     bool p_is_selected; // If the piece is selected
 };

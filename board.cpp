@@ -6,6 +6,8 @@ Board::Board(int screen_width, int screen_height)
     this->m_screen_width = screen_width; 
     this->m_screen_height = screen_height; 
     this->m_tile_width = screen_height / 16; 
+    this->m_player = Player::PLAYER_ONE; 
+    this->m_option = Game_Option::SELECTING; 
 
     bool is_red = true; 
 
@@ -22,40 +24,36 @@ Board::Board(int screen_width, int screen_height)
     }
 
     // Set the tiles for specific pieces: 
-    this->m_board[0][0].setPiece(RED_PIECE); 
-    this->m_board[2][0].setPiece(RED_PIECE); 
-    this->m_board[4][0].setPiece(RED_PIECE);
-    this->m_board[6][0].setPiece(RED_PIECE);
-    this->m_board[1][1].setPiece(RED_PIECE);
-    this->m_board[3][1].setPiece(RED_PIECE);
-    this->m_board[5][1].setPiece(RED_PIECE);
-    this->m_board[7][1].setPiece(RED_PIECE);
-    this->m_board[0][2].setPiece(RED_PIECE);
-    this->m_board[2][2].setPiece(RED_PIECE);
-    this->m_board[4][2].setPiece(RED_PIECE);
-    this->m_board[6][2].setPiece(RED_PIECE);
+    this->m_board[0][0].setPiece(Piece_Type::RED_PIECE); 
+    this->m_board[2][0].setPiece(Piece_Type::RED_PIECE); 
+    this->m_board[4][0].setPiece(Piece_Type::RED_PIECE);
+    this->m_board[6][0].setPiece(Piece_Type::RED_PIECE);
+    this->m_board[1][1].setPiece(Piece_Type::RED_PIECE);
+    this->m_board[3][1].setPiece(Piece_Type::RED_PIECE);
+    this->m_board[5][1].setPiece(Piece_Type::RED_PIECE);
+    this->m_board[7][1].setPiece(Piece_Type::RED_PIECE);
+    this->m_board[0][2].setPiece(Piece_Type::RED_PIECE);
+    this->m_board[2][2].setPiece(Piece_Type::RED_PIECE);
+    this->m_board[4][2].setPiece(Piece_Type::RED_PIECE);
+    this->m_board[6][2].setPiece(Piece_Type::RED_PIECE);
 
-    this->m_board[1][5].setPiece(BLACK_PIECE); 
-    this->m_board[3][5].setPiece(BLACK_PIECE);
-    this->m_board[5][5].setPiece(BLACK_PIECE);
-    this->m_board[7][5].setPiece(BLACK_PIECE);
-    this->m_board[0][6].setPiece(BLACK_PIECE);
-    this->m_board[2][6].setPiece(BLACK_PIECE);
-    this->m_board[4][6].setPiece(BLACK_PIECE);
-    this->m_board[6][6].setPiece(BLACK_PIECE);
-    this->m_board[1][7].setPiece(BLACK_PIECE);
-    this->m_board[3][7].setPiece(BLACK_PIECE);
-    this->m_board[5][7].setPiece(BLACK_PIECE);
-    this->m_board[7][7].setPiece(BLACK_PIECE);
+    this->m_board[1][5].setPiece(Piece_Type::BLACK_PIECE); 
+    this->m_board[3][5].setPiece(Piece_Type::BLACK_PIECE);
+    this->m_board[5][5].setPiece(Piece_Type::BLACK_PIECE);
+    this->m_board[7][5].setPiece(Piece_Type::BLACK_PIECE);
+    this->m_board[0][6].setPiece(Piece_Type::BLACK_PIECE);
+    this->m_board[2][6].setPiece(Piece_Type::BLACK_PIECE);
+    this->m_board[4][6].setPiece(Piece_Type::BLACK_PIECE);
+    this->m_board[6][6].setPiece(Piece_Type::BLACK_PIECE);
+    this->m_board[1][7].setPiece(Piece_Type::BLACK_PIECE);
+    this->m_board[3][7].setPiece(Piece_Type::BLACK_PIECE);
+    this->m_board[5][7].setPiece(Piece_Type::BLACK_PIECE);
+    this->m_board[7][7].setPiece(Piece_Type::BLACK_PIECE);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
 void Board::drawBoard(int const screen_width, int const screen_height)
 {
-    // Tile size parameters: 
-    int tile_x = 200; 
-    int tile_y = 200; 
-
     // Loop through game board and draw tiles: 
     int tile_y_pos = 300; 
     for (int col = 0; col < 8; col++)
@@ -77,14 +75,14 @@ void Board::drawBoard(int const screen_width, int const screen_height)
                            this->m_tile_width/3,
                            YELLOW);
             }
-            else if (this->m_board[row][col].getPiece() == RED_PIECE)
+            else if (this->m_board[row][col].getPiece() == Piece_Type::RED_PIECE)
             {
                 DrawCircle(tile_x_pos + this->m_tile_width/2, 
                            tile_y_pos + this->m_tile_width/2, 
                            this->m_tile_width/3, 
                            RED);
             }
-            else if (this->m_board[row][col].getPiece() == BLACK_PIECE)
+            else if (this->m_board[row][col].getPiece() == Piece_Type::BLACK_PIECE)
             {
                 DrawCircle(tile_x_pos + this->m_tile_width/2,
                            tile_y_pos + this->m_tile_width/2, 
@@ -105,9 +103,48 @@ void Board::handleMouseClick(void)
     int mouse_x = GetMouseX()/this->m_tile_width - 7; 
     int mouse_y = GetMouseY()/this->m_tile_width - 4;
 
-    // Determine if this has a piece and select it: 
-    if(this->m_board[mouse_x][mouse_y].getPiece() != NO_PIECE)
+    if (this->m_option == Game_Option::SELECTING)
     {
-        this->m_board[mouse_x][mouse_y].setPieceSelected(); 
+        selectPiece(mouse_x, mouse_y); 
+    }
+    else if (this->m_option == Game_Option::PLAYING)
+    {
+        playPiece(mouse_x, mouse_y); 
     }
 }
+
+//////////////////////////////////////////////////////////////////////////////////////
+void Board::selectPiece(int mouse_x, int mouse_y)
+{
+    // Determine if the spot clicked has a valid piece to select: 
+    if (this->m_board[mouse_x][mouse_y].getPiece() != Piece_Type::NO_PIECE)
+    {
+        // Find out if the right player clicked the right piece: 
+        if ((this->m_board[mouse_x][mouse_y].getPiece() == Piece_Type::RED_PIECE) and
+            (this->m_player == Player::PLAYER_ONE))
+        {
+            this->m_board[mouse_x][mouse_y].setPieceSelected(); 
+            this->m_option = Game_Option::PLAYING; 
+        }
+    }
+} 
+
+//////////////////////////////////////////////////////////////////////////////////////
+void Board::playPiece(int mouse_x, int mouse_y)
+{
+    // Determine if the selected piece was selected again: 
+    if (this->m_board[mouse_x][mouse_y].getPieceSelected())
+    {
+        // Reset the piece: 
+        if (this->m_player == Player::PLAYER_ONE)
+        {
+            this->m_board[mouse_x][mouse_y].setPieceSelected(); 
+        }
+        else if (this->m_player == Player::PLAYER_TWO)
+        {
+            this->m_board[mouse_x][mouse_y].setPieceSelected();
+        }
+
+        this->m_option = Game_Option::SELECTING; 
+    }
+} 
